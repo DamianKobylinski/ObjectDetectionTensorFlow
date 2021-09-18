@@ -59,8 +59,8 @@ if os.name =='posix':
     os.system("mv " + str(PRETRAINED_MODEL_NAME+'.tar.gz') + str(paths['PRETRAINED_MODEL_PATH']))
     os.system("cd " + str(paths['PRETRAINED_MODEL_PATH']) + " && tar -zxvf " + str(PRETRAINED_MODEL_NAME+'.tar.gz'))
 if os.name == 'nt':
-    os.system("wget.download(" + PRETRAINED_MODEL_URL + ")")
-    os.system("move" + PRETRAINED_MODEL_NAME+'.tar.gz' + " " + str(paths['PRETRAINED_MODEL_PATH']))
+    wget.download(PRETRAINED_MODEL_URL)
+    os.system("move " + PRETRAINED_MODEL_NAME+'.tar.gz' + " " + str(paths['PRETRAINED_MODEL_PATH']))
     os.system("cd " + str(paths['PRETRAINED_MODEL_PATH']) + " && tar -zxvf " + PRETRAINED_MODEL_NAME+'.tar.gz')
 
 
