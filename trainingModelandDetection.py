@@ -51,7 +51,12 @@ if os.name == 'nt':
     os.system("move protoc-3.15.6-win64.zip " + str(paths['PROTOC_PATH']))
     os.system("cd " + str(paths['PROTOC_PATH']) + " && tar -xf protoc -3.15.6-win64.zip")
     os.environ['PATH'] += os.pathsep + os.path.abspath(os.path.join(paths['PROTOC_PATH'], 'bin'))
-    os.system("cd Tensorflow/models/research && protoc object_detection/protos/*.proto --python_out=. && copy object_detection\\packages\\tf2\\setup.pysetup.py && python setup.py build && python setup.py install")
+    os.system(
+        "cd Tensorflow/models/research "
+        "&& ..\\..\\protoc\\bin\\protoc object_detection\\protos\\*.proto --python_out=. "
+        "&& copy object_detection\\packages\\tf2\\setup.py setup.py "
+        "&& python setup.py build "
+        "&& python setup.py install")
     os.system("cd Tensorflow/models/research/slim && pip install -e . ")
 
 if os.name =='posix':
