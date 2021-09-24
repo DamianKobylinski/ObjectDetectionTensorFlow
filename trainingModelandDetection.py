@@ -35,18 +35,15 @@ if os.name == 'nt':
     os.system(
         f"cd {cfg.paths['PROTOC_PATH']} "
         f"&& tar -xf protoc-3.15.6-win64.zip")
-    print("ABBA")
     os.system(
         "cd Tensorflow/models/research "
         "&& ..\\..\\protoc\\bin\\protoc object_detection\\protos\\*.proto --python_out=. "
         "&& copy object_detection\\packages\\tf2\\setup.py setup.py "
         "&& python setup.py build "
         "&& python setup.py install")
-    print("ABBA")
     os.system(
         "cd Tensorflow/models/research/slim "
         "&& pip install -e . ")
-    print("ABBA")
 
 if os.name == 'posix':
     os.system(f"wget {cfg.PRETRAINED_MODEL_URL}")
@@ -80,20 +77,6 @@ ARCHIVE_FILES = os.path.join(cfg.paths['IMAGE_PATH'], 'archive.tar.gz')
 if os.path.exists(ARCHIVE_FILES):
     os.system(f"tar -zxvf {ARCHIVE_FILES}")
 """
-
-if not os.path.exists(cfg.files['TF_RECORD_SCRIPT']):
-    os.system(f"git clone https://github.com/nicknochnack/GenerateTFRecord {cfg.paths['SCRIPTS_PATH']}")
-
-os.system(
-    f"python {cfg.files['TF_RECORD_SCRIPT']} "
-    f"-x {os.path.join(cfg.paths['IMAGE_PATH'], 'train')} "
-    f"-l {cfg.files['LABELMAP']} "
-    f"-o {os.path.join(cfg.paths['ANNOTATION_PATH'], 'train.record')}")
-os.system(
-    f"python {cfg.files['TF_RECORD_SCRIPT']} "
-    f"-x {os.path.join(cfg.paths['IMAGE_PATH'], 'test')} "
-    f"-l {cfg.files['LABELMAP']} "
-    f"-o {os.path.join(cfg.paths['ANNOTATION_PATH'], 'test.record')}")
 
 if os.name == 'posix':
     param = os.path.join(cfg.paths['PRETRAINED_MODEL_PATH'],

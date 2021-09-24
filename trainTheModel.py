@@ -1,6 +1,20 @@
 import os
 import config as cfg
 
+if not os.path.exists(cfg.files['TF_RECORD_SCRIPT']):
+    os.system(f"git clone https://github.com/nicknochnack/GenerateTFRecord {cfg.paths['SCRIPTS_PATH']}")
+
+os.system(
+    f"python {cfg.files['TF_RECORD_SCRIPT']} "
+    f"-x {os.path.join(cfg.paths['IMAGE_PATH'], 'train')} "
+    f"-l {cfg.files['LABELMAP']} "
+    f"-o {os.path.join(cfg.paths['ANNOTATION_PATH'], 'train.record')}")
+os.system(
+    f"python {cfg.files['TF_RECORD_SCRIPT']} "
+    f"-x {os.path.join(cfg.paths['IMAGE_PATH'], 'test')} "
+    f"-l {cfg.files['LABELMAP']} "
+    f"-o {os.path.join(cfg.paths['ANNOTATION_PATH'], 'test.record')}")
+
 TRAINING_SCRIPT = os.path.join(
     cfg.paths['APIMODEL_PATH'],
     'research',
