@@ -1,8 +1,19 @@
 import os
+import argparse
 import config as cfg
 
+parser = argparse.ArgumentParser(
+    description="Model training script")
+parser.add_argument("-s",
+                    "--train_steps",
+                    help="Number of train steps.",
+                    type=int, default=2000)
+
+args = parser.parse_args()
+
 if not os.path.exists(cfg.files['TF_RECORD_SCRIPT']):
-    os.system(f"git clone https://github.com/nicknochnack/GenerateTFRecord {cfg.paths['SCRIPTS_PATH']}")
+    os.system(f"git clone https://github.com/nicknochnack/GenerateTFRecord "
+              f"{cfg.paths['SCRIPTS_PATH']}")
 
 os.system(
     f"python {cfg.files['TF_RECORD_SCRIPT']} "
@@ -25,8 +36,7 @@ os.system(
     f"python {TRAINING_SCRIPT} "
     f"--model_dir={cfg.paths['CHECKPOINT_PATH']} "
     f"--pipeline_config_path={cfg.files['PIPELINE_CONFIG']} "
-    f"--num_train_steps=2000")
-
+    f"--num_train_steps={args.train_steps}")
 os.system(
     f"python {TRAINING_SCRIPT} "
     f"--model_dir={cfg.paths['CHECKPOINT_PATH']} "

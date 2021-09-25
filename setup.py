@@ -37,7 +37,8 @@ if os.name == 'nt':
         f"&& tar -xf protoc-3.15.6-win64.zip")
     os.system(
         "cd Tensorflow/models/research "
-        "&& ..\\..\\protoc\\bin\\protoc object_detection\\protos\\*.proto --python_out=. "
+        "&& ..\\..\\protoc\\bin\\protoc object_detection\\protos\\*.proto "
+        "--python_out=. "
         "&& copy object_detection\\packages\\tf2\\setup.py setup.py "
         "&& python setup.py build "
         "&& python setup.py install")
@@ -93,15 +94,14 @@ if os.name == 'nt':
         f"copy {param} "
         f"{os.path.join(cfg.paths['CHECKPOINT_PATH'])}")
 
+# os.system("pip install --update tensorflow")
 import tensorflow as tf
 from object_detection.utils import config_util
 from object_detection.protos import pipeline_pb2
 from google.protobuf import text_format
 
 config = config_util.get_configs_from_pipeline_file(
-    cfg.files['PIPELINE_CONFIG']
-)
-
+    cfg.files['PIPELINE_CONFIG'])
 
 pipeline_config = pipeline_pb2.TrainEvalPipelineConfig()
 with tf.io.gfile.GFile(cfg.files['PIPELINE_CONFIG'], "r") as f:
@@ -110,12 +110,16 @@ with tf.io.gfile.GFile(cfg.files['PIPELINE_CONFIG'], "r") as f:
 
 pipeline_config.model.ssd.num_classes = len(labels)
 pipeline_config.train_config.batch_size = 4
-pipeline_config.train_config.fine_tune_checkpoint = os.path.join(cfg.paths['PRETRAINED_MODEL_PATH'], cfg.PRETRAINED_MODEL_NAME, 'checkpoint', 'ckpt-0')
+pipeline_config.train_config.fine_tune_checkpoint = os.path.join(
+    cfg.paths['PRETRAINED_MODEL_PATH'], cfg.PRETRAINED_MODEL_NAME,
+    'checkpoint', 'ckpt-0')
 pipeline_config.train_config.fine_tune_checkpoint_type = "detection"
-pipeline_config.train_input_reader.label_map_path= cfg.files['LABELMAP']
-pipeline_config.train_input_reader.tf_record_input_reader.input_path[:] = [os.path.join(cfg.paths['ANNOTATION_PATH'], 'train.record')]
+pipeline_config.train_input_reader.label_map_path = cfg.files['LABELMAP']
+pipeline_config.train_input_reader.tf_record_input_reader.input_path[:] = [
+    os.path.join(cfg.paths['ANNOTATION_PATH'], 'train.record')]
 pipeline_config.eval_input_reader[0].label_map_path = cfg.files['LABELMAP']
-pipeline_config.eval_input_reader[0].tf_record_input_reader.input_path[:] = [os.path.join(cfg.paths['ANNOTATION_PATH'], 'test.record')]
+pipeline_config.eval_input_reader[0].tf_record_input_reader.input_path[:] = [
+    os.path.join(cfg.paths['ANNOTATION_PATH'], 'test.record')]
 
 config_text = text_format.MessageToString(pipeline_config)
 with tf.io.gfile.GFile(cfg.files['PIPELINE_CONFIG'], "wb") as f:

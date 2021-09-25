@@ -8,6 +8,12 @@ from object_detection.utils import visualization_utils as viz_utils
 from object_detection.builders import model_builder
 from object_detection.utils import config_util
 import config as cfg
+import pickle
+import communication as com
+import struct
+import time
+
+HOST, PORT = ('localhost', 6790)
 
 
 @tf.function
@@ -29,19 +35,34 @@ detection_model = model_builder.build(
 
 ckpt = tf.compat.v2.train.Checkpoint(model=detection_model)
 ckpt.restore(os.path.join(cfg.paths['CHECKPOINT_PATH'],
-             'ckpt-5')).expect_partial()
+             'ckpt-6')).expect_partial()
 
 category_index = label_map_util.create_category_index_from_labelmap(
     cfg.files['LABELMAP'])
 
-
 # Video Detection
-cap = cv2.VideoCapture(0)
-width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+connect = com.Communication()
 
-while cap.isOpened():
-    ret, frame = cap.read()
+print(f'{"[SERVER]":10}Communication starting up')
+connect.Host(HOST, PORT)
+
+data = b''
+headSize = struct.calcsize('I')
+
+ST = 0
+PT = 0
+
+while True:
+    data = connect.RecvFirstChunk(headSize, data)
+
+    shutdown = connect.HandleHeaderParams()
+    if shutdown:
+        cv2.destroyAllWindows()
+        break
+
+    msg, data = connect.RecvSecondChunk(headSize, data)
+    frame = pickle.loads(msg)
+
     image_np = np.array(frame)
 
     input_tensor = tf.convert_to_tensor(np.expand_dims(image_np, 0),
@@ -70,13 +91,38 @@ while cap.isOpened():
         category_index,
         use_normalized_coordinates=True,
         max_boxes_to_draw=5,
-        min_score_thresh=.3,
+        min_score_thresh=.7,
         agnostic_mode=False)
 
-    cv2.imshow('object detection', cv2.resize(image_np_with_detections,
-               (800, 600)))
+    classes = detections['detection_classes'] + 1
+    boxes = detections['detection_boxes']
+    scores = detections['detection_scores']
+    detected = []
 
-    if cv2.waitKey(10) & 0xFF == ord('q'):
-        cap.release()
+    for i in range(min(5, boxes.shape[0])):
+        if scores is None or scores[i] > 0.7:
+            if classes[i] in category_index.keys():
+                detected.append(category_index[classes[i]]['name'])
+
+    msg = pickle.dumps(detected)
+    header = struct.pack('!I', len(msg))
+    connect.Send(header, msg)
+
+    ST = time.time()
+    FPS = 1 / (ST-PT)
+    PT = ST
+    FPS = str(round(FPS))
+
+    cv2.putText(image_np_with_detections, FPS, (7, 70),
+                cv2.FONT_HERSHEY_SIMPLEX, 3, (100, 255, 0),
+                3, cv2.LINE_AA)
+    cv2.imshow('object detection', image_np_with_detections)
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        msg = b''
+        header = struct.pack('!I', 0xffffffff)
+        connect.Send(header, msg)
         cv2.destroyAllWindows()
         break
+
+connect.Close()

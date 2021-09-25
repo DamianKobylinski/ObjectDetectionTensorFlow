@@ -1,6 +1,7 @@
 import socket
 import struct
 
+
 # TODO thread method
 class Communication:
     def __init__(self):

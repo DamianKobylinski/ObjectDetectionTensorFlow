@@ -4,6 +4,8 @@ import pickle
 import communication as com
 import cv2
 
+HOST, PORT = ('localhost', 6790)
+
 
 def RecieveThread(connect):
     data = b''
@@ -29,9 +31,9 @@ if __name__ == '__main__':
 
     while True:
         try:
-            connect.Connect('localhost', 6790)
+            connect.Connect(HOST, PORT)
             break
-        except:
+        except Exception as e:
             print(f'{"[SERVER]":10}Reconnecting...')
 
     thread = threading.Thread(target=RecieveThread, args=(connect,))
