@@ -27,8 +27,8 @@ def speak():
                 for line in file:
                     speak += line
                 tts = gTTS(speak, lang="pl")
-                tts.save("gtts.mp3")
-                playsound('D://WinPy//dogita//Tescior//gtts.mp3')
+                tts.save("speach.mp3")
+                playsound('./speach.mp3')
                 time.sleep(2)
 
 
