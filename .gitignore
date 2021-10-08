@@ -2,4 +2,4 @@ __pycache__
 env
 Tensorflow
 detections.txt
-speach.mp3
+speech.mp3
